@@ -1,6 +1,8 @@
 "use server"
 import axiosServer from "@/shared/lib/axiosServer";
-import { Event, GetEventsParams } from "@/shared/types/event";
+import { CreateEventDto, Event, GetEventsParams, User } from "@/shared/types/event";
+import { cookies } from 'next/headers';
+
 
 const prefix = "/event"
 
@@ -16,4 +18,11 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Event[]> 
   console.log(res);
   return res.data;
 }
+
+export async function createEvent(event: CreateEventDto): Promise<Event> {
+  const res = await axiosServer.post(`${prefix}/create`, event);
+  return res.data;
+}
+
+
 

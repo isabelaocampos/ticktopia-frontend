@@ -19,3 +19,9 @@ export interface GetEventsParams {
   limit?: number;
   offset?: number;
 }
+
+export interface CreateEventDto {
+  name: string;
+  bannerPhotoUrl: string;
+  isPublic: boolean;
+}

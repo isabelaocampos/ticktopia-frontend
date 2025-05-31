@@ -1,10 +1,9 @@
 'use client'
 
 import { useAuth } from "@/features/auth/hooks/useAuth"
-import { User, LogOut, LogIn, UserPlus, Ticket, Calendar, Shield, Settings, Menu, X, ChevronDown, Camera, CalendarHeart } from "lucide-react"
+import { User, LogOut, LogIn, UserPlus, Ticket, Calendar, Shield, Settings, Menu, X, ChevronDown, Camera, CalendarHeart, FileChartColumn, Users, CalendarPlus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
-import { NavigationItem } from "../types/navigation"
 import Link from "next/link"
 import { Logo } from "./Logo"
 import { MobileMenuButton } from "./MobileMenuButton"
@@ -12,6 +11,7 @@ import { UserInfo } from "./UserInfo"
 import { LogoutButton } from "./LogoutButton"
 import { AuthButtons } from "./AuthButtons"
 import { MobileMenu } from "./MobileMenu"
+import { NavigationItem } from "../types/navigation"
 
 const NAVIGATION_CONFIG: NavigationItem[] = [
     {
@@ -40,8 +40,36 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
         href: "/event-manager/events",
         icon: CalendarHeart,
         roles: ["event-manager"],
+        priority: 2
+    },
+    {
+        label: "Usuarios",
+        href: "/admin/users",
+        icon: Users,
+        roles: ["admin"],
         priority: 1
     },
+    {
+        label: "Perfil",
+        href: "/profile",
+        icon: User,
+        roles: ["admin", "client", "event-manager", "ticketChecker"],
+        priority: 1
+    },
+    {
+        label: "Reportes",
+        href: "/admin/reports",
+        icon: FileChartColumn,
+        roles: ["admin"],
+        priority: 2
+    },
+    {
+        label: "Crear Evento",
+        href: "/event-manager/create",
+        icon: CalendarPlus,
+        roles: ["event-manager"],
+        priority: 3
+    }
 ]
 
 export default function TopBar() {
@@ -78,7 +106,7 @@ export default function TopBar() {
     }
 
     const availableNavItems = NAVIGATION_CONFIG
-        .filter(item => hasAnyRole(item.roles))
+        .filter(item => hasAnyRole(item.roles as Role[]))
         .sort((a, b) => (a.priority || 999) - (b.priority || 999))
 
     return (
