@@ -26,3 +26,4 @@ export async function register(email: string, password: string, name: string, la
   console.log("el usuario",res.data);
   return res.data;
 }
+

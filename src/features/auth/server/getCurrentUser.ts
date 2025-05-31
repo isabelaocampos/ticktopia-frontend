@@ -1,4 +1,3 @@
-// features/auth/server/getCurrentUser.ts
 import axiosServer from "@/shared/lib/axiosServer";
 import { AuthUser } from "@/shared/types/user";
 

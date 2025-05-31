@@ -37,7 +37,7 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
     },
     {
         label: "Mis eventos",
-        href: "/event-manager/events",
+        href: "/event/my-events",
         icon: CalendarHeart,
         roles: ["event-manager"],
         priority: 2
@@ -65,7 +65,7 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
     },
     {
         label: "Crear Evento",
-        href: "/event-manager/create",
+        href: "/event/create",
         icon: CalendarPlus,
         roles: ["event-manager"],
         priority: 3

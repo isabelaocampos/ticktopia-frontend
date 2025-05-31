@@ -19,6 +19,12 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Event[]> 
   return res.data;
 }
 
+export async function getEventsByUserId(userId: string): Promise<Event[]> {
+  const res = await axiosServer.get(`/event/find/user/${userId}`);
+  return res.data;
+}
+
+
 export async function createEvent(event: CreateEventDto): Promise<Event> {
   const res = await axiosServer.post(`${prefix}/create`, event);
   return res.data;
