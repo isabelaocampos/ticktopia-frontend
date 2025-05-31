@@ -1,3 +1,4 @@
+
 export function EventListEmptyState() {
   return (
     <div className="text-center py-12">
