@@ -30,5 +30,13 @@ export async function createEvent(event: CreateEventDto): Promise<Event> {
   return res.data;
 }
 
+export async function getEventById(id: string): Promise<Event> {
+  const res = await axiosServer.get(`${prefix}/find/${id}`);
+  return res.data;
+}
+
+
+
+
 
 
