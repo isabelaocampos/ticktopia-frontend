@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Event } from '@/shared/types/event';
 import { updateEvent } from '../events.api';
 import { UpdateEventDto } from '@/shared/types/event';
+import { uploadToCloudinary } from '@/shared/utils/uploadToCloudinary';
 
 interface UpdateEventFormProps {
   event: Event;
@@ -14,14 +15,82 @@ interface UpdateEventFormProps {
 export default function UpdateEventForm({ event }: UpdateEventFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: event.name,
     isPublic: event.isPublic,
     bannerPhotoUrl: event.bannerPhotoUrl || '',
   });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      setError('Solo se permiten archivos de imagen (JPEG, PNG, WebP, GIF)');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setError('El archivo debe ser menor a 5MB');
+      return;
+    }
+
+    setSelectedFile(file);
+    setError(null);
+
+    // Crear preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviewUrl(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedFile) return;
+
+    setIsUploadingImage(true);
+    setError(null);
+
+    try {
+      const imageUrl = await uploadToCloudinary(selectedFile);
+      setFormData(prev => ({
+        ...prev,
+        bannerPhotoUrl: imageUrl
+      }));
+      
+      // Limpiar selección
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      
+      // Limpiar input file
+      const fileInput = document.getElementById('bannerFile') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (err: any) {
+      console.error('Error uploading image:', err);
+      setError(err.message || 'Error al subir la imagen');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleCancelImageSelection = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    const fileInput = document.getElementById('bannerFile') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +123,7 @@ export default function UpdateEventForm({ event }: UpdateEventFormProps) {
       
       // Redirect después de 2 segundos
       setTimeout(() => {
-        router.push('/event/my-events');
+        router.push('/event/find/user');
       }, 2000);
 
     } catch (err: any) {
@@ -123,29 +192,77 @@ export default function UpdateEventForm({ event }: UpdateEventFormProps) {
           />
         </div>
 
-        {/* URL del banner */}
+        {/* Banner del evento */}
         <div>
-          <label htmlFor="bannerPhotoUrl" className="block text-sm font-medium text-gray-700 mb-2">
-            URL del Banner
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Banner del evento
           </label>
-          <input
-            type="url"
-            id="bannerPhotoUrl"
-            name="bannerPhotoUrl"
-            value={formData.bannerPhotoUrl}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="https://example.com/imagen.jpg"
-          />
           
-          {/* Preview de la imagen */}
+          {/* URL actual (solo lectura) */}
           {formData.bannerPhotoUrl && (
+            <div className="mb-4">
+              <label className="block text-xs text-gray-500 mb-1">URL actual:</label>
+              <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 break-all">
+                {formData.bannerPhotoUrl}
+              </div>
+            </div>
+          )}
+
+          {/* Input para nueva imagen */}
+          <div className="space-y-3">
+            <div>
+              <input
+                type="file"
+                id="bannerFile"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Formatos permitidos: JPEG, PNG, WebP, GIF. Máximo 5MB.
+              </p>
+            </div>
+
+            {/* Preview y botones de imagen seleccionada */}
+            {selectedFile && previewUrl && (
+              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <p className="text-sm font-medium text-gray-700 mb-2">Imagen seleccionada:</p>
+                <div className="relative w-full h-40 border rounded-lg overflow-hidden mb-3">
+                  <img
+                    src={previewUrl}
+                    alt="Preview de nueva imagen"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleUploadImage}
+                    disabled={isUploadingImage}
+                    className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-colors"
+                  >
+                    {isUploadingImage ? 'Subiendo...' : 'Usar esta imagen'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelImageSelection}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Preview de la imagen actual/nueva */}
+          {formData.bannerPhotoUrl && !previewUrl && (
             <div className="mt-3">
-              <p className="text-sm text-gray-600 mb-2">Vista previa:</p>
+              <p className="text-sm text-gray-600 mb-2">Imagen actual:</p>
               <div className="relative w-full h-40 border rounded-lg overflow-hidden">
                 <img
                   src={formData.bannerPhotoUrl}
-                  alt="Preview del banner"
+                  alt="Banner actual del evento"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -180,7 +297,7 @@ export default function UpdateEventForm({ event }: UpdateEventFormProps) {
         <div className="flex space-x-4 pt-6">
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isUploadingImage}
             className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? 'Actualizando...' : 'Actualizar Evento'}
@@ -188,8 +305,9 @@ export default function UpdateEventForm({ event }: UpdateEventFormProps) {
           
           <button
             type="button"
-            onClick={() => router.push('/event/my-events')}
-            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+            onClick={() => router.push('/event/find/user')}
+            disabled={isLoading || isUploadingImage}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Cancelar
           </button>

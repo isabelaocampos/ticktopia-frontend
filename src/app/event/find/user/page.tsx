@@ -1,4 +1,3 @@
-// app/event/my-events/page.tsx
 import { getCurrentUser } from '@/features/auth/server/getCurrentUser';
 import EventList from '@/features/events/components/EventList';
 import { getEventsByUserId } from '@/features/events/events.api';
