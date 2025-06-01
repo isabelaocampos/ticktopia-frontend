@@ -1,6 +1,4 @@
-"use server"
-
-import { cookies } from 'next/headers';
+import axiosClient from '@/shared/lib/axiosClient';
 import { BuyTicketDto, Ticket } from '@/shared/types/ticket';
 
 const prefix = '/tickets';
@@ -19,112 +17,64 @@ async function getAuthHeaders() {
 /**
  * Compra de tickets con Stripe Checkout - Server Action
  */
-export async function buyTickets(ticket: BuyTicketDto): Promise<{ url: string; success: boolean; error?: string }> {
+export async function buyTickets(ticket: BuyTicketDto): Promise<{ url: string }> {
+  console.log('🎫 Comprando tickets:', ticket);
+  console.log('🌐 URL del API:', `${prefix}/buy`);
+  
   try {
-    console.log("Server: Comprando tickets para:", ticket);
-    
-    const headers = await getAuthHeaders();
-    
-    const response = await fetch(`${prefix}/buy`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(ticket),
+    const res = await axiosClient.post(`${prefix}/buy`, ticket);
+    console.log('✅ Respuesta exitosa:', res.data);
+    return res.data;
+  } catch (error: any) {
+    console.error('❌ Error en buyTickets:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method
     });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Error ${response.status}:`, errorData);
-      
-      if (response.status === 401) {
-        return { url: '', success: false, error: 'No estás autenticado' };
-      }
-      if (response.status === 404) {
-        return { url: '', success: false, error: 'Presentación no encontrada' };
-      }
-      
-      return { url: '', success: false, error: 'Error al procesar la compra' };
-    }
-
-    const data = await response.json();
-    return { url: data.url, success: true };
-    
-  } catch (error) {
-    console.error('Error en buyTickets:', error);
-    return { url: '', success: false, error: 'Error de conexión' };
+    throw error;
   }
 }
 
 /**
  * Obtener tickets del usuario autenticado (activos) - Server Action
  */
-export async function getMyTickets(): Promise<{ tickets: Ticket[]; success: boolean; error?: string }> {
+export async function getMyTickets(): Promise<Ticket[]> {
   try {
-    const headers = await getAuthHeaders();
-    
-    const response = await fetch(`${prefix}/`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      return { tickets: [], success: false, error: 'Error al obtener tickets' };
-    }
-
-    const tickets = await response.json();
-    return { tickets, success: true };
-    
-  } catch (error) {
-    console.error('Error en getMyTickets:', error);
-    return { tickets: [], success: false, error: 'Error de conexión' };
+    const res = await axiosClient.get(`${prefix}`);
+    return res.data;
+  } catch (error: any) {
+    console.error('❌ Error obteniendo mis tickets:', error.response?.data || error.message);
+    throw error;
   }
 }
 
 /**
  * Obtener tickets históricos del usuario - Server Action
  */
-export async function getMyHistoricTickets(): Promise<{ tickets: Ticket[]; success: boolean; error?: string }> {
+export async function getMyHistoricTickets(): Promise<Ticket[]> {
   try {
-    const headers = await getAuthHeaders();
-    
-    const response = await fetch(`${prefix}/historic`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      return { tickets: [], success: false, error: 'Error al obtener tickets históricos' };
-    }
-
-    const tickets = await response.json();
-    return { tickets, success: true };
-    
-  } catch (error) {
-    console.error('Error en getMyHistoricTickets:', error);
-    return { tickets: [], success: false, error: 'Error de conexión' };
+    const res = await axiosClient.get('/tickets/historic');
+    return res.data;
+  } catch (error: any) {
+    console.error('❌ Error obteniendo tickets históricos:', error.response?.data || error.message);
+    throw error;
   }
 }
+
+
 
 /**
  * Obtener un ticket específico por ID - Server Action
  */
-export async function getTicketById(id: string): Promise<{ ticket: Ticket | null; success: boolean; error?: string }> {
+export async function getTicketById(id: string): Promise<Ticket> {
   try {
-    const headers = await getAuthHeaders();
-    
-    const response = await fetch(`${prefix}/${id}`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      return { ticket: null, success: false, error: 'Ticket no encontrado' };
-    }
-
-    const ticket = await response.json();
-    return { ticket, success: true };
-    
-  } catch (error) {
-    console.error('Error en getTicketById:', error);
-    return { ticket: null, success: false, error: 'Error de conexión' };
+    const res = await axiosClient.get(`${prefix}/${id}`);
+    return res.data;
+  } catch (error: any) {
+    console.error('❌ Error obteniendo ticket por ID:', error.response?.data || error.message);
+    throw error;
   }
 }
