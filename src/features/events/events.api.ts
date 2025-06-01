@@ -1,7 +1,7 @@
 "use server"
 import axiosServer from "@/shared/lib/axiosServer";
 import { CreateEventDto, Event, GetEventsParams, User } from "@/shared/types/event";
-import { cookies } from 'next/headers';
+//import { cookies } from 'next/headers';
 
 const prefix = "/event"
 
@@ -47,8 +47,8 @@ export async function createEvent(
   return res.data;
 }
 
-export async function getEventById(id: string): Promise<Event> {
-  const res = await axiosServer.get(`${prefix}/find/${id}`);
+export async function getEventById(term: string): Promise<Event> {
+  const res = await axiosServer.get(`${prefix}/find/${term}`);
   return res.data;
 }
 
