@@ -45,13 +45,15 @@ export async function getMyTickets(): Promise<Ticket[]> {
  */
 export async function getMyHistoricTickets(): Promise<Ticket[]> {
   try {
-    const res = await axiosClient.get(`${prefix}/historic`);
+    const res = await axiosClient.get('/tickets/historic');
     return res.data;
   } catch (error: any) {
     console.error('❌ Error obteniendo tickets históricos:', error.response?.data || error.message);
     throw error;
   }
 }
+
+
 
 /**
  * Obtener un ticket específico por ID

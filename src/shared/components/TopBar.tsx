@@ -16,14 +16,14 @@ import { NavigationItem } from "../types/navigation"
 const NAVIGATION_CONFIG: NavigationItem[] = [
     {
         label: "Mis Tickets",
-        href: "/client/my-tickets",
+        href: "/tickets/my-tickets",
         icon: Ticket,
         roles: ["client"],
         priority: 1
     },
     {
         label: "Mi historial",
-        href: "/client/my-historic",
+        href: "/tickets/my-historic",
         icon: Calendar,
         roles: ["client"],
         priority: 1
@@ -69,6 +69,13 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
         icon: CalendarPlus,
         roles: ["event-manager"],
         priority: 3
+    },
+        {
+        label: "Crear Ticket",
+        href: "/tickets/create",
+        icon: Ticket,
+        roles: ["event-manager","admin"],
+        priority: 2
     }
 ]
 
