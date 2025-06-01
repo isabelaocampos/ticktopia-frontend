@@ -1,6 +1,6 @@
 "use server"
 import axiosServer from "@/shared/lib/axiosServer";
-import { CreateEventDto, Event, GetEventsParams, User } from "@/shared/types/event";
+import { CreateEventDto, Event, GetEventsParams, UpdateEventDto, User } from "@/shared/types/event";
 import { cookies } from 'next/headers';
 
 const prefix = "/event"
@@ -51,6 +51,11 @@ export async function createEvent(
 //Get events by id -- used for a single event in user for the ticket sale 
 export async function getEventById(id: string): Promise<Event> {
   const res = await axiosServer.get(`${prefix}/find/${id}`);
+  return res.data;
+}
+
+export async function updateEvent(eventId: string, updateData: UpdateEventDto): Promise<Event> {
+  const res = await axiosServer.put(`/event/update/${eventId}`, updateData);
   return res.data;
 }
 

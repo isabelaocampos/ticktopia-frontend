@@ -17,7 +17,7 @@ export function EventCard({ event, showControls = false }: EventCardProps) {
   // Determinar la URL y el texto del botón
   const buttonText = shouldShowManagerControls ? 'Gestionar evento' : 'Ver Evento';
   const eventUrl = shouldShowManagerControls 
-    ? `/event-manager/events/manage/${event.id}` 
+    ? `/event/update/${event.id}` 
     : `/event/${event.id}`;
 
   return (

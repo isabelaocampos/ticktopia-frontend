@@ -25,3 +25,10 @@ export interface CreateEventDto {
   bannerPhotoUrl: string;
   isPublic: boolean;
 }
+
+export type UpdateEventDto = {
+  name?: string;
+  isPublic?: boolean;
+  bannerPhotoUrl?: string;
+};
+
