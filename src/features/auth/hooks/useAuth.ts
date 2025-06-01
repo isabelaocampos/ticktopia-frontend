@@ -4,11 +4,28 @@ import { AppDispatch, RootState } from '@/store/store';
 import { useSelector, useDispatch } from 'react-redux';
 import { login as loginApi } from '../auth.api';
 
+const SESSION_DURATION = 60 * 60 * 1000; // 1 hora
+const WARNING_THRESHOLD = 5 * 60 * 1000; // 5 minutos antes de expirar
+
+
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, isAuthenticated, isLoading, error } = useSelector(
+  const { user, isAuthenticated, isLoading, error, loginTime } = useSelector(
     (state: RootState) => state.auth
   );
+
+  const checkSessionExpiration = (): boolean => {
+    if (!loginTime) return false;
+
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - loginTime;
+    const remainingTime = SESSION_DURATION - elapsedTime;
+    
+    // Si quedan menos de 5 minutos de sesión
+    return remainingTime <= WARNING_THRESHOLD;
+  };
+
+
 
   const updateUserProfile = (userData: AuthUser) => {
     dispatch(updateUser(userData));
@@ -24,11 +41,16 @@ export const useAuth = () => {
       if (!response) {
         throw new Error('Error en el login');
       }
+      if ('user' in response) {
+        const userData: AuthUser = response.user;
+        dispatch(loginSuccess(userData));
+        return userData;
 
-      const userData: AuthUser = response.user;
-      dispatch(loginSuccess(userData));
-
-      return userData;
+      } else {
+        const errorMessage = response?.error || 'Error desconocido';
+        console.error('Error en el login:', errorMessage);
+        dispatch(loginFailure("Inicio de sesión fallido, revisa tus credenciales"));
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       dispatch(loginFailure(errorMessage));
@@ -62,7 +84,9 @@ export const useAuth = () => {
     logout: logoutUser,
     hasRole,
     hasAnyRole,
+    loginTime,           // <-- exponemos loginTime
     hasAllRoles,
-    updateUserProfile
+    updateUserProfile,
+    checkSessionExpiration
   };
 };

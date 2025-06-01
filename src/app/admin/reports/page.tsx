@@ -1,4 +1,4 @@
-    "use client"
+"use client"
 import React from 'react';
 import { generateOccupationReport, generateSalesReport } from '@/features/reports/reports.api';
 import { DownloadReportsClient } from '@/features/reports/components/DownloadReportsClient';
