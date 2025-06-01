@@ -37,7 +37,7 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
     },
     {
         label: "Mis eventos",
-        href: "/event/my-events",
+        href: "/event/find/user",
         icon: CalendarHeart,
         roles: ["event-manager"],
         priority: 2

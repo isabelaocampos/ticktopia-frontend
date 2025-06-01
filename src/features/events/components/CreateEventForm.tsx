@@ -34,9 +34,9 @@ export default function CreateEventForm() {
 
       alert('Evento creado exitosamente');
 
-      setTimeout(() => {
-        router.push('/'); // Redirigir a la lista de eventos
-      })
+      
+      router.push('/'); // Redirigir a la lista de eventos
+      
       
       // Redirigir o mostrar success
     } catch (error) {

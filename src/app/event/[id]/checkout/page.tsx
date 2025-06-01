@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [event, setEvent] = useState<Event | null>(null);
+  const [error, setError] = useState<string>("");
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
@@ -22,6 +23,7 @@ export default function CheckoutPage() {
         setEvent(data);
       } catch (err) {
         console.error("Error cargando evento:", err);
+        setError("Error al cargar el evento");
       }
     };
 
@@ -30,15 +32,23 @@ export default function CheckoutPage() {
 
   const handleCheckout = async () => {
     setLoading(true);
+    setError("");
+    
     try {
-      const session = await buyTickets({
+      const result = await buyTickets({
         quantity,
         presentationId: id,
       });
 
-      window.location.href = session.url;
+      if (result.success && result.url) {
+        console.log("Redirigiendo a Stripe:", result.url);
+        window.location.href = result.url;
+      } else {
+        setError(result.error || "Error al procesar el pago");
+      }
     } catch (error) {
       console.error("Error iniciando checkout:", error);
+      setError("Error inesperado al procesar el pago");
     } finally {
       setLoading(false);
     }
@@ -47,6 +57,12 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Compra de Boletas</h1>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
 
       {event && (
         <div className="bg-white shadow-md rounded-lg p-6 mb-8">
@@ -91,10 +107,10 @@ export default function CheckoutPage() {
 
         <button
           onClick={handleCheckout}
-          disabled={loading}
-          className="bg-brand text-white px-6 py-2 rounded hover:bg-brand-dark transition w-full"
+          disabled={loading || !event}
+          className="bg-brand text-white px-6 py-2 rounded hover:bg-brand-dark transition w-full disabled:opacity-50"
         >
-          {loading ? "Redirigiendo..." : "Ir a Pagar"}
+          {loading ? "Procesando pago..." : "Ir a Pagar"}
         </button>
       </div>
     </div>

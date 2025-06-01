@@ -18,8 +18,9 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Event[]> 
   return res.data;
 }
 
-export async function getEventsByUserId(userId: string): Promise<Event[]> {
-  const res = await axiosServer.get(`/event/find/user/${userId}`);
+export async function getEventsByUserId(): Promise<Event[]> {
+  // No necesitas pasar userId porque el backend lo obtiene del token
+  const res = await axiosServer.get(`/event/find/user`);
   return res.data;
 }
 
@@ -47,6 +48,7 @@ export async function createEvent(
   return res.data;
 }
 
+//Get events by id -- used for a single event in user for the ticket sale 
 export async function getEventById(id: string): Promise<Event> {
   const res = await axiosServer.get(`${prefix}/find/${id}`);
   return res.data;
