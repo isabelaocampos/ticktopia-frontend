@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createEvent } from '../events.api';
+import { uploadToCloudinary } from '@/shared/utils/uploadToCloudinary';
 
 export default function CreateEventForm() {
   const router = useRouter();
@@ -12,25 +13,34 @@ export default function CreateEventForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Ejemplo de cómo usar en tu CreateEventForm
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    
     try {
-      if (!bannerPhoto) {
-        throw new Error('Debe seleccionar una imagen para el banner');
+      // 1. Subir imagen a Cloudinary primero
+      const imageFile = bannerPhoto;
+      if (!imageFile) {
+        throw new Error('No se seleccionó una imagen para el banner.');
       }
+      const cloudinaryUrl = await uploadToCloudinary(imageFile);
+      
+      // 2. Crear evento con la URL
+      await createEvent(
+        name,
+        isPublic,
+        cloudinaryUrl // Pasar la URL de Cloudinary
+      );
 
-      // URL falsa de prueba solo para verificar el flujo
-      const bannerPhotoUrl = 'https://via.placeholder.com/600x300.png?text=Banner+de+Prueba';
+      alert('Evento creado exitosamente');
 
-      await createEvent({ name, bannerPhotoUrl, isPublic });
-      router.push('/event/findAll');
-    } catch (err: any) {
-      setError(err.message || 'Error al crear el evento');
-    } finally {
-      setLoading(false);
+      setTimeout(() => {
+        router.push('/'); // Redirigir a la lista de eventos
+      })
+      
+      // Redirigir o mostrar success
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
