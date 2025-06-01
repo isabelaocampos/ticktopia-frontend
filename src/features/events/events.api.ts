@@ -3,7 +3,6 @@ import axiosServer from "@/shared/lib/axiosServer";
 import { CreateEventDto, Event, GetEventsParams, User } from "@/shared/types/event";
 import { cookies } from 'next/headers';
 
-
 const prefix = "/event"
 
 export async function getEvents(params: GetEventsParams = {}): Promise<Event[]> {
@@ -24,11 +23,26 @@ export async function getEventsByUserId(userId: string): Promise<Event[]> {
   return res.data;
 }
 
+// OPCIÓN 1: Enviar solo la URL después de subir a Cloudinary
+export async function createEvent(
+  name: string,
+  isPublic: boolean,
+  bannerPhotoUrl: string
+): Promise<Event> {
+  const payload = {
+    name,
+    isPublic,
+    bannerPhotoUrl
+  };
 
-export async function createEvent(event: CreateEventDto): Promise<Event> {
-  const res = await axiosServer.post(`${prefix}/create`, event);
+  console.log('Payload enviado:', payload); // Debug
+
+  const res = await axiosServer.post(`${prefix}/create`, payload, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  console.log('Respuesta del servidor:', res.data); // Debug
   return res.data;
 }
-
-
-
