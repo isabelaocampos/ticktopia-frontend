@@ -1,7 +1,4 @@
 'use client';
-
-'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { register } from '../../auth.api';
@@ -16,7 +13,7 @@ export default function RegisterComponent() {
   });
   const [registerError, setRegisterError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
-  
+
   const router = useRouter();
   const { login, isLoading: isLoggingIn, error: loginError } = useAuth();
 
@@ -41,19 +38,20 @@ export default function RegisterComponent() {
         credentials.name,
         credentials.lastname
       );
-      
-      if (registerData) {
-        // Después del registro exitoso, hacer login usando useAuth
+
+      if (!('error' in registerData)) {
         const userData = await login(credentials.email, credentials.password);
-        
+
         if (userData) {
           router.push('/');
         }
+      } else {
+        setRegisterError(registerData.error);
       }
     } catch (err: any) {
       // Error handling for registration
       console.error('Register error:', err);
-      
+
       // Manejar diferentes tipos de errores
       if (err.response?.data?.message) {
         setRegisterError(err.response.data.message);
@@ -185,8 +183,8 @@ export default function RegisterComponent() {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             ¿Ya tienes cuenta?{' '}
-            <a 
-              href="/auth/login" 
+            <a
+              href="/auth/login"
               className="text-brand hover:text-violet font-semibold transition-colors"
             >
               Inicia sesión aquí

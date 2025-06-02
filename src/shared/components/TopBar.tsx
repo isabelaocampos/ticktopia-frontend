@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from "@/features/auth/hooks/useAuth"
-import { User, LogOut, LogIn, UserPlus, Ticket, Calendar, Shield, Settings, Menu, X, ChevronDown, Camera, CalendarHeart, FileChartColumn, Users, CalendarPlus } from "lucide-react"
+import { User, LogOut, LogIn, UserPlus, Ticket, Calendar, Shield, Settings, Menu, X, ChevronDown, Camera, CalendarHeart, FileChartColumn, Users, CalendarPlus} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
@@ -55,6 +55,27 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
         icon: User,
         roles: ["admin", "client", "event-manager", "ticketChecker"],
         priority: 1
+    },
+    {
+        label: "Usuarios",
+        href: "/admin/users",
+        icon: Users,
+        roles: ["admin"],
+        priority: 1
+    },
+    {
+        label: "Perfil",
+        href: "/profile",
+        icon: User,
+        roles: ["admin", "client", "event-manager", "ticketChecker"],
+        priority: 2
+    },
+    {
+        label: "Reportes",
+        href: "/admin/reports",
+        icon: FileChartColumn,
+        roles: ["admin"],
+        priority: 2
     },
     {
         label: "Reportes",
