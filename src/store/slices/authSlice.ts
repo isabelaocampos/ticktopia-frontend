@@ -6,6 +6,8 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  loginTime: null,
+
 };
 
 const authSlice = createSlice({
@@ -21,12 +23,18 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;
+      state.loginTime = Date.now(); // <-- guardamos el timestamp aquí
+
     },
     loginFailure: (state, action: PayloadAction<string>) => {
       state.user = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = action.payload;
+      state.loginTime = null; // <-- limpiamos
+      state.loginTime = null; // <-- limpiamos
+
+
     },
     logout: (state) => {
       state.user = null;
@@ -42,6 +50,9 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updateUser: (state, action: PayloadAction<AuthUser>) => {
+      state.user = action.payload
+    }
   },
 });
 
@@ -52,6 +63,7 @@ export const {
   logout,
   updateUserRoles,
   clearError,
+  updateUser
 } = authSlice.actions;
 
 export default authSlice.reducer;
