@@ -64,13 +64,6 @@ const NAVIGATION_CONFIG: NavigationItem[] = [
         priority: 1
     },
     {
-        label: "Perfil",
-        href: "/profile",
-        icon: User,
-        roles: ["admin", "client", "event-manager", "ticketChecker"],
-        priority: 2
-    },
-    {
         label: "Reportes",
         href: "/admin/reports",
         icon: FileChartColumn,
