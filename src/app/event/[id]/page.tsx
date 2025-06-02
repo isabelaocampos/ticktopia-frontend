@@ -1,25 +1,98 @@
+"use client"
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getEventById } from '@/features/events/events.api';
-import { use } from 'react';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Event } from '@/shared/types/event';
 
-interface EventDetailPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function EventDetailPage({ params }: EventDetailPageProps) {
-  const { id } = use(params);
+export default function EventDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   
-  // Validación del ID antes de hacer la llamada al API
-  if (!id) {
-    console.error('Event ID is undefined');
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Validación del ID antes de hacer la llamada al API
+    if (!id) {
+      console.error('Event ID is undefined');
+      notFound();
+      return;
+    }
+
+    const fetchEvent = async () => {
+      try {
+        const result = await getEventById(id);
+        
+        console.log('🔍 Resultado completo del API:', result);
+        console.log('🔍 Tipo de resultado:', typeof result);
+        console.log('🔍 ¿Es array?', Array.isArray(result));
+        
+        if ('error' in result) {
+          setError(result.error);
+        } else {
+          console.log('🎪 Evento recibido:', result);
+          console.log('🎭 Presentaciones:', result.presentations);
+          console.log('🎭 Tipo de presentations:', typeof result.presentations);
+          console.log('🎭 ¿presentations es array?', Array.isArray(result.presentations));
+          console.log('🎭 Longitud de presentations:', result.presentations?.length);
+          
+          setEvent(result);
+        }
+      } catch (err) {
+        console.error('Error fetching event:', err);
+        setError('Error al cargar el evento');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [id]);
+
+  // Estados de carga y error
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando evento...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <h2 className="text-lg font-semibold text-red-800 mb-2">
+                Error al cargar evento
+              </h2>
+              <p className="text-red-600 text-sm">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Intentar de nuevo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
     return notFound();
   }
-  
-  const event = use(getEventById(id));
-  
-  if (!event) return notFound();
 
   return (
     <div className="container mx-auto p-6">
@@ -58,6 +131,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       {/* Lista de presentaciones */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Presentaciones Disponibles</h2>
+      
         
         {Array.isArray(event.presentations) && event.presentations.length > 0 ? (
           <div className="space-y-4">
@@ -84,7 +158,15 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No hay presentaciones asociadas aún.</p>
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+            <p className="text-gray-500">No hay presentaciones asociadas aún.</p>
+            <p className="text-sm text-gray-400 mt-2">
+              {event.presentations ? 
+                `Presentaciones encontradas pero no son un array válido (${typeof event.presentations})` : 
+                'No se encontraron presentaciones en el evento'
+              }
+            </p>
+          </div>
         )}
       </div>
     </div>
