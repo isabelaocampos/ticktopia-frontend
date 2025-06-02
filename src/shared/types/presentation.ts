@@ -1,5 +1,5 @@
-export interface Presentation {
-  idPresentation: string;
+// shared/types/presentation.ts
+export interface CreatePresentationDto {
   place: string;
   capacity: number;
   openDate: string;
@@ -11,4 +11,5 @@ export interface Presentation {
   ticketAvailabilityDate: string;
   ticketSaleAvailabilityDate: string;
   city: string;
+  eventId: string;
 }

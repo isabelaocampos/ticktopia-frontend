@@ -35,3 +35,23 @@ export interface BuyTicketDto {
   presentationId: string;
   quantity: number;
 }
+
+export type TicketInput = {
+  userId: string
+  presentationId: string
+}
+
+export type UserOption = {
+  id: string
+  email: string
+}
+
+export interface PresentationOption {
+idPresentation: string;
+startDate: string; // ISO format e.g. '2025-05-06T10:00:00Z'
+place: string;
+city: string;
+event?: {
+name: string;
+};
+}
