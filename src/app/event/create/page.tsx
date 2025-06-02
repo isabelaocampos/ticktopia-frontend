@@ -1,13 +1,5 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/features/auth/server/getCurrentUser";
-import CreateEventPage from "@/features/events/components/CreateEventForm"; // componente cliente
+import CreateEventForm from "@/features/events/components/CreateEventForm";
 
 export default async function Page() {
-  const user = await getCurrentUser();
-
-  if (!user || !user.roles.includes("event-manager")) {
-    redirect("/unauthorized");
-  }
-
-  return <CreateEventPage user={user} />;
+  return <CreateEventForm />;
 }

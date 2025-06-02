@@ -1,9 +1,10 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createEvent } from '../events.api';
 import { uploadToCloudinary } from '@/shared/utils/uploadToCloudinary';
+import axiosClient from '@/shared/lib/axiosClient';
 
 export default function CreateEventForm() {
   const router = useRouter();
@@ -13,12 +14,36 @@ export default function CreateEventForm() {
   const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   const [formData, setFormData] = useState({
     name: '',
     isPublic: true,
     bannerPhotoUrl: '',
   });
+
+  // Verificar autenticación al cargar el componente
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axiosClient.get('/auth/me');
+        const user = res.data;
+        
+        if (!user || !user.roles.includes('event-manager')) {
+          router.push('/unauthorized');
+          return;
+        }
+      } catch (error) {
+        console.error('Error verificando autenticación:', error);
+        router.push('/login'); // o donde manejes el login
+        return;
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -105,12 +130,21 @@ export default function CreateEventForm() {
         return;
       }
 
-      await createEvent(
+      // Llamar a la API
+      const result = await createEvent(
         formData.name.trim(),
         formData.isPublic,
         formData.bannerPhotoUrl
       );
 
+      // Verificar si hay error en la respuesta
+      if ('error' in result) {
+        setError(result.error);
+        setIsLoading(false);
+        return;
+      }
+
+      // Si llegamos aquí, el evento se creó exitosamente
       setSuccess(true);
       
       // Redirect después de 2 segundos
@@ -120,7 +154,7 @@ export default function CreateEventForm() {
 
     } catch (err: any) {
       console.error('Error creating event:', err);
-      setError(err.response?.data?.message || 'Error al crear el evento');
+      setError('Error inesperado al crear el evento');
     } finally {
       setIsLoading(false);
     }
@@ -133,6 +167,18 @@ export default function CreateEventForm() {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (isCheckingAuth) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Verificando autenticación...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

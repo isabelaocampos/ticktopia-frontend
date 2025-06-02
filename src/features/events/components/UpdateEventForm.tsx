@@ -142,6 +142,10 @@ export default function UpdateEventForm({ event }: UpdateEventFormProps) {
     }));
   };
 
+  const handleDeleteClick = () => {
+    router.push(`/event/delete/${event.id}`);
+  };
+
   if (success) {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -294,23 +298,36 @@ export default function UpdateEventForm({ event }: UpdateEventFormProps) {
         </div>
 
         {/* Botones */}
-        <div className="flex space-x-4 pt-6">
+        <div className="flex flex-col space-y-3 pt-6">
+          {/* Botón de actualizar */}
           <button
             type="submit"
             disabled={isLoading || isUploadingImage}
-            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? 'Actualizando...' : 'Actualizar Evento'}
           </button>
           
-          <button
-            type="button"
-            onClick={() => router.push('/event/find/user')}
-            disabled={isLoading || isUploadingImage}
-            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Cancelar
-          </button>
+          {/* Botones de acción secundarias */}
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              onClick={() => router.push('/event/find/user')}
+              disabled={isLoading || isUploadingImage}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Cancelar
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleDeleteClick}
+              disabled={isLoading || isUploadingImage}
+              className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Eliminar Evento
+            </button>
+          </div>
         </div>
       </form>
     </div>

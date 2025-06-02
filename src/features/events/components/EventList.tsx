@@ -24,28 +24,39 @@ export default function EventList({
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMoreData, setHasMoreData] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { hasRole } = useAuth();
 
   const shouldChangeTitle = showControls && hasRole('event-manager');
 
   const loadEvents = async (page: number) => {
     setLoading(true);
+    setError(null);
+    
     try {
       const offset = (page - 1) * itemsPerPage;
-      const newEvents = await getEvents({
+      const result = await getEvents({
         limit: itemsPerPage,
         offset
       });
 
-      if (page === 1) {
-        setEvents(newEvents);
-      } else {
-        setEvents(prev => [...prev, ...newEvents]);
+      // Verificar si hay error en la respuesta
+      if ('error' in result) {
+        setError(result.error);
+        return;
       }
 
-      setHasMoreData(newEvents.length === itemsPerPage);
-    } catch (error) {
-      console.error('Error loading events:', error);
+      // Si no hay error, procesar los eventos
+      if (page === 1) {
+        setEvents(result);
+      } else {
+        setEvents(prev => [...prev, ...result]);
+      }
+
+      setHasMoreData(result.length === itemsPerPage);
+    } catch (err) {
+      console.error('Error loading events:', err);
+      setError('Error inesperado al cargar eventos');
     } finally {
       setLoading(false);
     }
@@ -69,14 +80,33 @@ export default function EventList({
     currentPage * itemsPerPage
   );
 
-
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">{shouldChangeTitle? "Mis Eventos" : "Eventos Disponibles"}</h2>
-        <p className="text-gray-600">{shouldChangeTitle? "Aqui encontraras los eventos que te pertenecen  " : "Descubre los mejores eventos cerca de ti"}</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          {shouldChangeTitle ? "Mis Eventos" : "Eventos Disponibles"}
+        </h2>
+        <p className="text-gray-600">
+          {shouldChangeTitle 
+            ? "Aquí encontrarás los eventos que te pertenecen" 
+            : "Descubre los mejores eventos cerca de ti"
+          }
+        </p>
       </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-800 text-sm">{error}</p>
+          <button
+            onClick={() => loadEvents(currentPage)}
+            className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
+          >
+            Intentar de nuevo
+          </button>
+        </div>
+      )}
 
       {/* Events Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -93,7 +123,7 @@ export default function EventList({
       {loading && <EventListSkeleton />}
 
       {/* Empty State */}
-      {events.length === 0 && !loading && <EventListEmptyState />}
+      {events.length === 0 && !loading && !error && <EventListEmptyState />}
 
       {/* Pagination */}
       {events.length > 0 && (
