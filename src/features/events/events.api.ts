@@ -1,6 +1,6 @@
 "use server"
 import axiosServer from "@/shared/lib/axiosServer";
-import { CreateEventDto, Event, GetEventsParams, User } from "@/shared/types/event";
+import { CreateEventDto, Event, GetEventsParams, User, UpdateEventDto } from "@/shared/types/event";
 //import { cookies } from 'next/headers';
 
 const prefix = "/event"
@@ -18,8 +18,9 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Event[]> 
   return res.data;
 }
 
-export async function getEventsByUserId(userId: string): Promise<Event[]> {
-  const res = await axiosServer.get(`/event/find/user/${userId}`);
+export async function getEventsByUserId(): Promise<Event[]> {
+  // No necesitas pasar userId porque el backend lo obtiene del token
+  const res = await axiosServer.get(`/event/find/user`);
   return res.data;
 }
 
@@ -49,6 +50,11 @@ export async function createEvent(
 
 export async function getEventById(term: string): Promise<Event> {
   const res = await axiosServer.get(`${prefix}/find/${term}`);
+  return res.data;
+}
+
+export async function updateEvent(eventId: string, updateData: UpdateEventDto): Promise<Event> {
+  const res = await axiosServer.put(`/event/update/${eventId}`, updateData);
   return res.data;
 }
 

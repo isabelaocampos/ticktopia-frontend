@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [event, setEvent] = useState<Event | null>(null);
+  const [error, setError] = useState<string>("");
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
@@ -38,6 +39,8 @@ export default function CheckoutPage() {
     }
 
     setLoading(true);
+    setError("");
+    
     try {
       console.log('🎫 Iniciando compra con datos:', {
         quantity,
@@ -149,7 +152,7 @@ export default function CheckoutPage() {
           disabled={loading || !id}
           className="bg-brand text-white px-6 py-2 rounded hover:bg-brand-dark transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Redirigiendo..." : "Ir a Pagar"}
+          {loading ? "Procesando pago..." : "Ir a Pagar"}
         </button>
         
         {/* Debug info - remover en producción */}

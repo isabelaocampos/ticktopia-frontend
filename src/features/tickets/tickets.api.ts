@@ -3,8 +3,19 @@ import { BuyTicketDto, Ticket } from '@/shared/types/ticket';
 
 const prefix = '/tickets';
 
+// Función helper para obtener headers con autenticación
+async function getAuthHeaders() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+}
+
 /**
- * Compra de tickets con Stripe Checkout
+ * Compra de tickets con Stripe Checkout - Server Action
  */
 export async function buyTickets(ticket: BuyTicketDto): Promise<{ url: string }> {
   console.log('🎫 Comprando tickets:', ticket);
@@ -28,7 +39,7 @@ export async function buyTickets(ticket: BuyTicketDto): Promise<{ url: string }>
 }
 
 /**
- * Obtener tickets del usuario autenticado (activos)
+ * Obtener tickets del usuario autenticado (activos) - Server Action
  */
 export async function getMyTickets(): Promise<Ticket[]> {
   try {
@@ -41,7 +52,7 @@ export async function getMyTickets(): Promise<Ticket[]> {
 }
 
 /**
- * Obtener tickets históricos del usuario (usados o inactivos)
+ * Obtener tickets históricos del usuario - Server Action
  */
 export async function getMyHistoricTickets(): Promise<Ticket[]> {
   try {
@@ -56,7 +67,7 @@ export async function getMyHistoricTickets(): Promise<Ticket[]> {
 
 
 /**
- * Obtener un ticket específico por ID
+ * Obtener un ticket específico por ID - Server Action
  */
 export async function getTicketById(id: string): Promise<Ticket> {
   try {

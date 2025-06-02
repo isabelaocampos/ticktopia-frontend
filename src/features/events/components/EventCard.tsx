@@ -15,7 +15,7 @@ export function EventCard({ event, showControls = false }: EventCardProps) {
   
   const buttonText = shouldShowManagerControls ? 'Gestionar evento' : 'Ver Evento';
   const eventUrl = shouldShowManagerControls 
-    ? `/event-manager/events/manage/${event.id}` 
+    ? `/event/update/${event.id}` 
     : `/event/${event.id}`;
 
   return (
