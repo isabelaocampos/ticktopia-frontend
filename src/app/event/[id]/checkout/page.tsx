@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { buyTickets } from "@/features/tickets/tickets.api";
 import { getEventById } from "@/features/events/events.api";
 import Image from "next/image";
@@ -15,14 +15,21 @@ export default function CheckoutPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
+  const searchParams = useSearchParams();
+  const presentationId = searchParams.get("presentationId");
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         console.log('🔍 Cargando evento con ID:', id);
         const data = await getEventById(id);
-        console.log('✅ Evento cargado exitosamente:', data.name);
-        setEvent(data);
+        if ("error" in data) {
+          console.error("❌ Error cargando evento:", data.error);
+          setError(data.error);
+        } else {
+          console.log('✅ Evento cargado exitosamente:', data.name);
+          setEvent(data);
+        }
       } catch (err) {
         console.error("❌ Error cargando evento:", err);
       }
@@ -44,12 +51,14 @@ export default function CheckoutPage() {
     try {
       console.log('🎫 Iniciando compra con datos:', {
         quantity,
-        presentationId: id, // Usando ID del evento como antes
+        presentationId:  presentationId!,
       });
+
+      console.log("🧾 presentationId en checkout:", presentationId);
 
       const session = await buyTickets({
         quantity,
-        presentationId: id, // Tu backend espera el ID del evento aquí
+        idPresentation: presentationId!, // Tu backend espera el ID del evento aquí
       });
 
       console.log('✅ Sesión de pago creada:', session);
